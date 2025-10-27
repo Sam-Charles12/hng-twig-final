@@ -1,0 +1,148 @@
+{% extends 'base.twig' %}
+
+{% block title %}Sign Up - TicketFlow{% endblock %}
+
+{% block styles %}{% endblock %}
+
+{% block content %}
+<div class="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-gray-50 px-4 py-12">
+  <div class="mx-auto w-full max-w-[1440px]">
+    <div class="mx-auto w-full max-w-md">
+      <div class="mb-8 text-center">
+        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600">
+          <i data-lucide="ticket" class="h-7 w-7 text-white"></i>
+        </div>
+        <h1 class="mb-2 text-3xl font-bold">Create Your Account</h1>
+        <p class="text-gray-600">Get started with TicketFlow today</p>
+      </div>
+      <div class="rounded-2xl border bg-white shadow-xl">
+        <div class="border-b px-6 py-4">
+          <h2 class="text-xl font-semibold">Sign Up</h2>
+          <p class="text-sm text-gray-600 mt-1">Create a new account to start managing tickets</p>
+        </div>
+        <div class="p-6">
+          <form id="registerForm" class="space-y-4">
+            <div id="errorAlert" class="hidden items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-900">
+              <i data-lucide="alert-circle" class="h-4 w-4 flex-shrink-0"></i>
+              <span id="errorMessage"></span>
+            </div>
+            <div class="space-y-2">
+              <label for="name" class="text-sm font-medium">Full Name <span class="text-red-500">*</span></label>
+              <input id="name" type="text" placeholder="John Doe" required class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+            </div>
+            <div class="space-y-2">
+              <label for="email" class="text-sm font-medium">Email <span class="text-red-500">*</span></label>
+              <input id="email" type="email" placeholder="name@example.com" required class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+            </div>
+            <div class="space-y-2">
+              <label for="password" class="text-sm font-medium">Password <span class="text-red-500">*</span></label>
+              <input id="password" type="password" placeholder="Create a password (min 6 characters)" required class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+            </div>
+            <div class="space-y-2">
+              <label for="confirmPassword" class="text-sm font-medium">Confirm Password <span class="text-red-500">*</span></label>
+              <input id="confirmPassword" type="password" placeholder="Confirm your password" required class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+            </div>
+            <button type="submit" id="submitBtn" class="inline-flex h-10 w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">Create Account</button>
+            <div class="text-center text-sm text-gray-600">
+              Already have an account? <a href="{{ base_path }}/login" class="text-blue-600 hover:underline">Sign in</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    lucide.createIcons();
+  });
+  const registerForm = document.getElementById('registerForm');
+  const nameInput = document.getElementById('name');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const confirmPasswordInput = document.getElementById('confirmPassword');
+  const submitBtn = document.getElementById('submitBtn');
+  const errorAlert = document.getElementById('errorAlert');
+  const errorMessage = document.getElementById('errorMessage');
+  function showError(message) {
+    errorMessage.textContent = message;
+    errorAlert.classList.remove('hidden');
+    errorAlert.classList.add('flex');
+    lucide.createIcons();
+  }
+  function hideError() {
+    errorAlert.classList.add('hidden');
+    errorAlert.classList.remove('flex');
+  }
+  function showToast(message, type = 'success') {
+    Toastify({
+      text: message,
+      duration: 3000,
+      gravity: 'top',
+      position: 'right',
+      style: {
+        background: type === 'success' ? 'linear-gradient(to right, #10b981, #059669)' : 'linear-gradient(to right, #ef4444, #dc2626)',
+      },
+    }).showToast();
+  }
+  registerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideError();
+    const name = nameInput.value.trim();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    const confirmPassword = confirmPasswordInput.value;
+    if (!name || !email || !password || !confirmPassword) {
+      showError('Please fill in all fields');
+      return;
+    }
+    if (password.length < 6) {
+      showError('Password must be at least 6 characters');
+      return;
+    }
+    if (password !== confirmPassword) {
+      showError('Passwords do not match');
+      return;
+    }
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating account...';
+    nameInput.disabled = true;
+    emailInput.disabled = true;
+    passwordInput.disabled = true;
+    confirmPasswordInput.disabled = true;
+    try {
+      const result = await Auth.register(name, email, password);
+      if (result.success) {
+        showToast('Account created successfully! Welcome to TicketFlow.', 'success');
+        setTimeout(() => {
+          URLHelper.navigate('/dashboard');
+        }, 1000);
+      } else {
+        const errorMsg = result.error || 'We could not complete your registration. Please retry.';
+        showError(errorMsg);
+        showToast(errorMsg, 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create Account';
+        nameInput.disabled = false;
+        emailInput.disabled = false;
+        passwordInput.disabled = false;
+        confirmPasswordInput.disabled = false;
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      const errorMsg = 'Failed to create your account. Please retry.';
+      showError(errorMsg);
+      showToast(errorMsg, 'error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Create Account';
+      nameInput.disabled = false;
+      emailInput.disabled = false;
+      passwordInput.disabled = false;
+      confirmPasswordInput.disabled = false;
+    }
+  });
+</script>
+{% endblock %}

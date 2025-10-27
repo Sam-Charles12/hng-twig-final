@@ -1,0 +1,182 @@
+{% extends 'base.twig' %}
+
+{% block title %}{% if ticketId %}Edit Ticket{% else %}Create New Ticket{% endif %} - TicketFlow{% endblock %}
+
+{% block styles %}{% endblock %}
+
+{% block content %}
+<div class="min-h-[calc(100vh-4rem)] bg-gray-50 py-8">
+  <div class="mx-auto w-full max-w-[1440px] px-4">
+    <div class="mx-auto max-w-3xl">
+      <button id="backBtn" class="mb-6 inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium hover:bg-gray-100">
+        <i data-lucide="arrow-left" class="h-4 w-4"></i>
+        Back
+      </button>
+      <div class="rounded-2xl shadow-lg bg-white">
+        <div class="border-b px-6 py-4">
+          <h2 id="pageTitle" class="text-xl font-semibold">Create New Ticket</h2>
+        </div>
+        <div class="p-6">
+          <form id="ticketForm" class="space-y-6">
+            <div id="formError" class="hidden rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700"></div>
+            <div class="space-y-2">
+              <label for="title" class="text-sm font-medium">Title <span class="text-red-500">*</span></label>
+              <input id="title" type="text" placeholder="Enter ticket title" required class="flex h-10 w-full rounded-md border px-3 py-2 text-sm" />
+              <p id="titleError" class="hidden text-sm text-red-600"></p>
+            </div>
+            <div class="space-y-2">
+              <label for="description" class="text-sm font-medium">Description <span class="text-red-500">*</span></label>
+              <textarea id="description" placeholder="Describe the issue or request" rows="5" required class="flex w-full rounded-md border px-3 py-2 text-sm"></textarea>
+              <p id="descriptionError" class="hidden text-sm text-red-600"></p>
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div class="space-y-2">
+                <label for="status" class="text-sm font-medium">Status <span class="text-red-500">*</span></label>
+                <select id="status" required class="flex h-10 w-full rounded-md border px-3 py-2 text-sm">
+                  <option value="open">Open</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="closed">Closed</option>
+                </select>
+                <p id="statusError" class="hidden text-sm text-red-600"></p>
+              </div>
+              <div class="space-y-2">
+                <label for="priority" class="text-sm font-medium">Priority</label>
+                <select id="priority" class="flex h-10 w-full rounded-md border px-3 py-2 text-sm">
+                  <option value="low">Low</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="high">High</option>
+                  <option value="critical">Critical</option>
+                </select>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <label for="assignee" class="text-sm font-medium">Assign to <span class="text-red-500">*</span></label>
+              <select id="assignee" required class="flex h-10 w-full rounded-md border px-3 py-2 text-sm">
+                <option value="">Select team member</option>
+                <option value="John Doe">John Doe</option>
+                <option value="Jane Smith">Jane Smith</option>
+                <option value="Mike Johnson">Mike Johnson</option>
+                <option value="Sarah Williams">Sarah Williams</option>
+                <option value="Robert Brown">Robert Brown</option>
+                <option value="Emily Davis">Emily Davis</option>
+              </select>
+              <p id="assigneeError" class="hidden text-sm text-red-600"></p>
+            </div>
+            <div class="flex gap-3 pt-4">
+              <button type="submit" id="submitBtn" class="flex-1 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Create Ticket</button>
+              <button type="button" id="cancelBtn" class="rounded-md border px-4 py-2 text-sm font-medium hover:bg-gray-100">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ base_path }}/public/js/tickets.js"></script>
+<script>
+  function showToast(message, type = 'success') {
+    Toastify({
+      text: message,
+      duration: 3000,
+      gravity: 'top',
+      position: 'right',
+      style: {
+        background: type === 'success' ? 'linear-gradient(to right, #10b981, #059669)' : 'linear-gradient(to right, #ef4444, #dc2626)',
+      },
+    }).showToast();
+  }
+  function getQueryParam(param) {
+    const params = new URLSearchParams(window.location.search);
+    return params.get(param);
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!Auth.isAuthenticated()) {
+      URLHelper.navigate('/auth/login');
+      return;
+    }
+    lucide.createIcons();
+    const ticketId = getQueryParam('id');
+    const isEdit = !!ticketId;
+    const form = document.getElementById('ticketForm');
+    const pageTitle = document.getElementById('pageTitle');
+    const submitBtn = document.getElementById('submitBtn');
+    const backBtn = document.getElementById('backBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    if (isEdit) {
+      const ticket = TicketManager.getTicket(ticketId);
+      if (!ticket) {
+        const content = `<div class='flex flex-col items-center justify-center py-16'><div class='mb-4 rounded-full bg-gray-100 p-6'><i data-lucide='alert-circle' class='h-12 w-12 text-gray-400'></i></div><h2 class='mb-2 font-semibold'>Ticket Not Found</h2><p class='mb-6 text-gray-600'>The ticket you're looking for doesn't exist.</p><a href='${URLHelper.url('/tickets')}' class='rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white'>Back to Tickets</a></div>`;
+        document.querySelector('.p-6').innerHTML = content;
+        lucide.createIcons();
+        return;
+      }
+      pageTitle.textContent = 'Edit Ticket';
+      submitBtn.textContent = 'Update Ticket';
+      document.getElementById('title').value = ticket.title;
+      document.getElementById('description').value = ticket.description;
+      document.getElementById('status').value = ticket.status;
+      document.getElementById('priority').value = ticket.priority;
+      document.getElementById('assignee').value = ticket.assignee;
+    }
+    backBtn.onclick = () => URLHelper.navigate('/tickets');
+    cancelBtn.onclick = () => URLHelper.navigate('/tickets');
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const title = document.getElementById('title').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const status = document.getElementById('status').value;
+      const priority = document.getElementById('priority').value;
+      const assignee = document.getElementById('assignee').value.trim();
+      document.querySelectorAll('[id$="Error"]').forEach(el => el.classList.add('hidden'));
+      document.getElementById('formError').classList.add('hidden');
+      let hasErrors = false;
+      if (!title) {
+        document.getElementById('titleError').textContent = 'Title is required';
+        document.getElementById('titleError').classList.remove('hidden');
+        hasErrors = true;
+      } else if (title.length > 120) {
+        document.getElementById('titleError').textContent = 'Title must be 120 characters or less';
+        document.getElementById('titleError').classList.remove('hidden');
+        hasErrors = true;
+      }
+      if (!description) {
+        document.getElementById('descriptionError').textContent = 'Description is required';
+        document.getElementById('descriptionError').classList.remove('hidden');
+        hasErrors = true;
+      } else if (description.length > 2000) {
+        document.getElementById('descriptionError').textContent = 'Description must be 2000 characters or less';
+        document.getElementById('descriptionError').classList.remove('hidden');
+        hasErrors = true;
+      }
+      if (!status || !['open', 'in_progress', 'closed'].includes(status)) {
+        document.getElementById('statusError').textContent = 'Valid status is required';
+        document.getElementById('statusError').classList.remove('hidden');
+        hasErrors = true;
+      }
+      if (!assignee) {
+        document.getElementById('assigneeError').textContent = 'Assignee is required';
+        document.getElementById('assigneeError').classList.remove('hidden');
+        hasErrors = true;
+      }
+      if (hasErrors) return;
+      try {
+        if (isEdit) {
+          TicketManager.updateTicket(ticketId, { title, description, status, priority, assignee });
+          showToast('Ticket updated successfully!', 'success');
+        } else {
+          TicketManager.createTicket({ title, description, status, priority, assignee, createdBy: Auth.getUser()?.email || 'demo@example.com' });
+          showToast('Ticket created successfully!', 'success');
+        }
+        setTimeout(() => URLHelper.navigate('/tickets'), 1000);
+      } catch (err) {
+        document.getElementById('formError').textContent = err.message || 'Failed to save ticket';
+        document.getElementById('formError').classList.remove('hidden');
+        showToast(err.message || 'Failed to save ticket', 'error');
+      }
+    });
+  });
+</script>
+{% endblock %}

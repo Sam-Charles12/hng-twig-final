@@ -1,0 +1,186 @@
+{% extends 'base.twig' %}
+
+{% block title %}TicketFlow - Modern Support Ticket Management{% endblock %}
+
+{% block content %}
+<div class="min-h-screen overflow-hidden">
+  {# Hero Section with Wavy Background #}
+  <section class="relative bg-gradient-to-br from-blue-600 to-blue-800 text-white">
+    {# Decorative Circles #}
+    <div class="absolute top-10 right-10 h-64 w-64 rounded-full bg-blue-400/20 blur-3xl"></div>
+    <div class="absolute bottom-20 left-10 h-96 w-96 rounded-full bg-purple-400/10 blur-3xl"></div>
+    <div class="absolute top-1/2 left-1/3 h-32 w-32 rounded-full border-4 border-white/20"></div>
+    
+    {# Hero Content #}
+    <div class="relative mx-auto w-full max-w-[1440px] px-4 py-20 md:py-32">
+      <div class="mx-auto max-w-4xl text-center">
+        <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 shadow-lg backdrop-blur-sm">
+          <i data-lucide="ticket" class="h-4 w-4"></i>
+          <span class="text-sm">Trusted by 10,000+ teams worldwide</span>
+        </div>
+        
+        <h1 class="mb-6 text-4xl md:text-5xl lg:text-6xl font-bold text-white">
+          The Modern Way to
+          <br />
+          <span class="text-blue-200">Manage Support Tickets</span>
+        </h1>
+        
+        <p class="mb-8 text-xl text-blue-100">
+          Streamline your support workflow, collaborate with your team, and deliver
+          exceptional customer service with TicketFlow.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="{{ base_path }}/register" class="inline-flex items-center justify-center gap-2 rounded-md bg-white px-6 py-3 text-base font-medium text-blue-600 shadow-sm transition-colors hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+            Get Started Free
+            <i data-lucide="arrow-right" class="h-4 w-4"></i>
+          </a>
+          <a href="{{ base_path }}/login" class="inline-flex items-center justify-center rounded-md border border-white bg-transparent px-6 py-3 text-base font-medium text-white shadow-sm transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+            Login
+          </a>
+        </div>
+
+        <p class="mt-4 text-sm text-blue-200">
+          No credit card required • Free 14-day trial
+        </p>
+      </div>
+    </div>
+
+    {# Wavy Bottom Border #}
+    <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-[0]">
+      <svg class="relative block h-[60px] w-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="#ffffff"></path>
+      </svg>
+    </div>
+  </section>
+
+  {# Features Grid #}
+  <section class="bg-white py-20">
+    <div class="mx-auto w-full max-w-[1440px] px-4">
+      <div class="mb-12 text-center">
+        <h2 class="mb-4 text-3xl md:text-4xl font-bold">Everything You Need</h2>
+        <p class="text-xl text-gray-600">
+          Powerful features to help you manage tickets efficiently
+        </p>
+      </div>
+
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {% set features = [
+          {
+            icon: 'zap',
+            title: 'Lightning Fast',
+            description: 'Create and manage tickets in seconds with our intuitive interface.'
+          },
+          {
+            icon: 'users',
+            title: 'Team Collaboration',
+            description: 'Assign tickets to team members and track progress together.'
+          },
+          {
+            icon: 'bar-chart-3',
+            title: 'Powerful Analytics',
+            description: 'Get insights into ticket trends and team performance.'
+          },
+          {
+            icon: 'shield',
+            title: 'Secure & Reliable',
+            description: 'Your data is protected with enterprise-grade security.'
+          },
+          {
+            icon: 'clock',
+            title: 'Real-time Updates',
+            description: 'Stay informed with instant notifications and updates.'
+          },
+          {
+            icon: 'check-circle-2',
+            title: 'Smart Automation',
+            description: 'Automate repetitive tasks and focus on what matters.'
+          }
+        ] %}
+
+        {% for feature in features %}
+        <div class="rounded-2xl border-2 border-gray-200 bg-white shadow-lg transition-all hover:border-blue-200 hover:shadow-xl">
+          <div class="p-6">
+            <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-blue-100 shadow-md">
+              <i data-lucide="{{ feature.icon }}" class="h-7 w-7 text-blue-600"></i>
+            </div>
+            <h3 class="mb-2 text-xl font-semibold">{{ feature.title }}</h3>
+            <p class="text-gray-600">{{ feature.description }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  {# Benefits Section #}
+  <section class="bg-gray-50 py-20">
+    <div class="mx-auto w-full max-w-[1440px] px-4">
+      <div class="rounded-3xl bg-white p-8 shadow-xl md:p-12">
+        <div class="grid gap-12 lg:grid-cols-2">
+          <div>
+            <h2 class="mb-6 text-3xl md:text-4xl font-bold">
+              Why Teams Choose
+              <br />
+              TicketFlow
+            </h2>
+            <p class="mb-8 text-lg text-gray-600">
+              Join thousands of teams who have transformed their support workflow
+              with our comprehensive ticket management solution.
+            </p>
+            <a href="{{ base_path }}/register" class="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-6 py-3 text-base font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+              Start Your Free Trial
+              <i data-lucide="arrow-right" class="h-4 w-4"></i>
+            </a>
+          </div>
+
+          <div class="space-y-4">
+            {% set benefits = [
+              'Unlimited tickets and team members',
+              'Priority support and training',
+              'Advanced reporting and analytics',
+              'Custom workflows and automation',
+              'API access for integrations',
+              '99.9% uptime guarantee'
+            ] %}
+
+            {% for benefit in benefits %}
+            <div class="flex items-start gap-3 rounded-xl bg-gray-50 p-4">
+              <div class="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
+                <i data-lucide="check-circle-2" class="h-4 w-4 text-green-600"></i>
+              </div>
+              <p class="text-lg">{{ benefit }}</p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {# CTA Section #}
+  <section class="bg-white py-20">
+    <div class="mx-auto w-full max-w-[1440px] px-4">
+      <div class="rounded-3xl border-2 border-blue-600 bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-2xl">
+        <div class="p-12 text-center">
+          <h2 class="mb-4 text-3xl md:text-4xl font-bold text-white">
+            Ready to Get Started?
+          </h2>
+          <p class="mb-8 text-xl text-blue-100">
+            Join thousands of teams managing their tickets with TicketFlow
+          </p>
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="{{ base_path }}/register" class="inline-flex items-center justify-center gap-2 rounded-md bg-white px-6 py-3 text-base font-medium text-blue-600 shadow-sm transition-colors hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+              Get Started
+              <i data-lucide="arrow-right" class="h-4 w-4"></i>
+            </a>
+            <a href="{{ base_path }}/login" class="inline-flex items-center justify-center rounded-md border border-white bg-transparent px-6 py-3 text-base font-medium text-white shadow-sm transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+              Login
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

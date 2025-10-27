@@ -1,0 +1,323 @@
+{% extends "base.twig" %}
+
+{% block styles %}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
+  <div class="max-w-4xl mx-auto">
+    <!-- Back button -->
+    <button id="backBtn" class="mb-6 flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
+      <i data-lucide="arrow-left" class="h-4 w-4"></i>
+      <span>Back to Tickets</span>
+    </button>
+
+    <!-- Main ticket container -->
+    <div id="ticketContainer" class="bg-white rounded-lg shadow-lg p-8">
+      <!-- Loading state -->
+      <div id="loadingState" class="flex items-center justify-center py-12">
+        <div class="text-center">
+          <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
+          <p class="mt-4 text-gray-600">Loading ticket...</p>
+        </div>
+      </div>
+
+      <!-- Error state -->
+      <div id="errorState" class="hidden">
+        <div class="text-center py-12">
+          <i data-lucide="alert-circle" class="h-12 w-12 text-red-500 mx-auto mb-4"></i>
+          <h2 class="text-2xl font-bold text-gray-800 mb-2">Ticket Not Found</h2>
+          <p class="text-gray-600 mb-6">The ticket you're looking for doesn't exist or has been deleted.</p>
+          <button id="goBackBtn" class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-medium">
+            Go Back to Tickets
+          </button>
+        </div>
+      </div>
+
+      <!-- Ticket detail state -->
+      <div id="detailState" class="hidden">
+        <!-- Header with title, status and priority -->
+        <div class="mb-8 pb-6 border-b border-gray-200">
+          <div class="flex items-start justify-between gap-4 mb-4">
+            <div class="flex-1">
+              <h1 id="ticketTitle" class="text-3xl font-bold text-gray-800 break-words"></h1>
+            </div>
+            <div class="flex gap-2 flex-shrink-0">
+              <span id="statusBadge" class="inline-block px-3 py-1 rounded-full text-sm font-semibold"></span>
+              <span id="priorityBadge" class="inline-block px-3 py-1 rounded border-2 text-sm font-semibold"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-8">
+          <h2 class="text-lg font-semibold text-gray-700 mb-3">Description</h2>
+          <div id="ticketDescription" class="text-gray-600 whitespace-pre-wrap bg-gray-50 p-4 rounded-lg"></div>
+        </div>
+
+        <!-- Ticket Info Grid -->
+        <div class="mb-8 grid grid-cols-2 gap-6">
+          <div>
+            <h3 class="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">Assigned To</h3>
+            <div class="flex items-center gap-2 text-gray-700">
+              <i data-lucide="user" class="h-5 w-5 text-blue-500"></i>
+              <span id="assigneeName"></span>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">Created By</h3>
+            <div class="flex items-center gap-2 text-gray-700">
+              <i data-lucide="user-check" class="h-5 w-5 text-green-500"></i>
+              <span id="createdByName"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timestamps -->
+        <div class="mb-8 grid grid-cols-2 gap-6 bg-gray-50 p-4 rounded-lg">
+          <div>
+            <h3 class="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">Created</h3>
+            <div class="flex items-center gap-2 text-gray-600">
+              <i data-lucide="calendar" class="h-4 w-4"></i>
+              <span id="createdDate"></span>
+            </div>
+            <div class="flex items-center gap-2 text-gray-600 text-sm mt-1">
+              <i data-lucide="clock" class="h-4 w-4"></i>
+              <span id="createdTime"></span>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">Last Updated</h3>
+            <div class="flex items-center gap-2 text-gray-600">
+              <i data-lucide="calendar" class="h-4 w-4"></i>
+              <span id="updatedDate"></span>
+            </div>
+            <div class="flex items-center gap-2 text-gray-600 text-sm mt-1">
+              <i data-lucide="clock" class="h-4 w-4"></i>
+              <span id="updatedTime"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Timeline -->
+        <div class="mb-8">
+          <h2 class="text-lg font-semibold text-gray-700 mb-4">Activity</h2>
+          <div class="space-y-6">
+            <!-- Created event -->
+            <div class="flex gap-4">
+              <div class="flex flex-col items-center">
+                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <i data-lucide="plus" class="h-5 w-5 text-blue-600"></i>
+                </div>
+                <div class="w-0.5 h-16 bg-gray-200 my-2"></div>
+              </div>
+              <div class="pt-2">
+                <p class="text-sm font-semibold text-gray-800">Ticket Created</p>
+                <p class="text-sm text-gray-600" id="createdActivityTime"></p>
+              </div>
+            </div>
+
+            <!-- Updated event -->
+            <div class="flex gap-4">
+              <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                <i data-lucide="check" class="h-5 w-5 text-green-600"></i>
+              </div>
+              <div class="pt-2">
+                <p class="text-sm font-semibold text-gray-800">Last Updated</p>
+                <p class="text-sm text-gray-600" id="updatedActivityTime"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="flex gap-3 pt-6 border-t border-gray-200">
+          <button id="editBtn" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium">
+            <i data-lucide="edit" class="h-4 w-4"></i>
+            <span>Edit</span>
+          </button>
+          <button id="deleteBtn" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium">
+            <i data-lucide="trash-2" class="h-4 w-4"></i>
+            <span>Delete</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
+  <div class="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl">
+    <h2 class="text-lg font-bold mb-2">Are you sure?</h2>
+    <p class="mb-4 text-gray-600">This will permanently delete the ticket.</p>
+    <div class="flex justify-end gap-2">
+      <button id="cancelDeleteBtn" class="rounded-md border px-4 py-2 text-sm hover:bg-gray-50">Cancel</button>
+      <button id="confirmDeleteBtn" class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">Delete</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ base_path }}/public/js/tickets.js"></script>
+<script>
+  // Protected route - redirect if not authenticated
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!Auth.isAuthenticated()) {
+      window.location.href = URLHelper.url('/auth/login');
+      return;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const ticketId = urlParams.get('id');
+
+    if (!ticketId) {
+      showErrorState();
+      return;
+    }
+
+    const ticket = TicketManager.getTicket(ticketId);
+    if (!ticket) {
+      showErrorState();
+      return;
+    }
+
+    loadTicketDetail(ticket);
+    setupEventListeners(ticketId);
+  });
+
+  function loadTicketDetail(ticket) {
+    // Hide loading, show detail
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('detailState').classList.remove('hidden');
+
+    // Status labels
+    const STATUS_LABELS = {
+      'open': 'Open',
+      'in_progress': 'In Progress',
+      'closed': 'Closed'
+    };
+
+    // Priority labels
+    const PRIORITY_LABELS = {
+      'low': 'Low',
+      'medium': 'Medium',
+      'high': 'High',
+      'critical': 'Critical'
+    };
+
+    // Helper functions for styling
+    function getStatusColor(status) {
+      switch (status) {
+        case 'open': return 'bg-green-100 text-green-700';
+        case 'in_progress': return 'bg-amber-100 text-amber-700';
+        case 'closed': return 'bg-gray-100 text-gray-700';
+        default: return 'bg-gray-100 text-gray-700';
+      }
+    }
+
+    function getPriorityColor(priority) {
+      switch (priority) {
+        case 'low': return 'border-green-500 text-green-700';
+        case 'medium': return 'border-yellow-500 text-yellow-700';
+        case 'high': return 'border-orange-500 text-orange-700';
+        case 'critical': return 'border-red-500 text-red-700';
+        default: return 'border-gray-500 text-gray-700';
+      }
+    }
+
+    // Set ticket title and description
+    document.getElementById('ticketTitle').textContent = ticket.title;
+    document.getElementById('ticketDescription').textContent = ticket.description;
+
+    // Set status and priority badges
+    const statusBadge = document.getElementById('statusBadge');
+    statusBadge.textContent = STATUS_LABELS[ticket.status];
+    statusBadge.className = `inline-block px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(ticket.status)}`;
+
+    const priorityBadge = document.getElementById('priorityBadge');
+    priorityBadge.textContent = PRIORITY_LABELS[ticket.priority].toUpperCase();
+    priorityBadge.className = `inline-block px-3 py-1 rounded border-2 text-sm font-semibold ${getPriorityColor(ticket.priority)}`;
+
+    // Set assignee and creator
+    document.getElementById('assigneeName').textContent = ticket.assignee;
+    document.getElementById('createdByName').textContent = ticket.createdBy;
+
+    // Format dates
+    const createdDate = new Date(ticket.createdAt);
+    const updatedDate = new Date(ticket.updatedAt);
+
+    document.getElementById('createdDate').textContent = createdDate.toLocaleDateString();
+    document.getElementById('createdTime').textContent = createdDate.toLocaleTimeString();
+    document.getElementById('updatedDate').textContent = updatedDate.toLocaleDateString();
+    document.getElementById('updatedTime').textContent = updatedDate.toLocaleTimeString();
+
+    // Activity timeline
+    document.getElementById('createdActivityTime').textContent = `Created on ${createdDate.toLocaleString()}`;
+    document.getElementById('updatedActivityTime').textContent = `Updated on ${updatedDate.toLocaleString()}`;
+
+    // Reinitialize Lucide icons
+    lucide.createIcons();
+  }
+
+  function showErrorState() {
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('detailState').classList.add('hidden');
+    document.getElementById('errorState').classList.remove('hidden');
+  }
+
+  function setupEventListeners(ticketId) {
+    // Back button
+    document.getElementById('backBtn').addEventListener('click', () => {
+      URLHelper.navigate('/tickets');
+    });
+
+    // Go back button in error state
+    document.getElementById('goBackBtn').addEventListener('click', () => {
+      URLHelper.navigate('/tickets');
+    });
+
+    // Edit button
+    document.getElementById('editBtn').addEventListener('click', () => {
+      URLHelper.navigate('/ticket-form?id=' + ticketId);
+    });
+
+    // Delete button
+    let deleteModal = null;
+    document.getElementById('deleteBtn').addEventListener('click', () => {
+      if (!deleteModal) {
+        deleteModal = document.getElementById('deleteModal');
+      }
+      deleteModal.classList.remove('hidden');
+      deleteModal.classList.add('flex');
+    });
+
+    // Cancel delete
+    document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
+      deleteModal.classList.add('hidden');
+      deleteModal.classList.remove('flex');
+    });
+
+    // Confirm delete
+    document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+      TicketManager.deleteTicket(ticketId);
+      
+      // Show success notification
+      Toastify({
+        text: 'Ticket deleted successfully',
+        duration: 3000,
+        gravity: 'top',
+        position: 'right',
+        style: {
+          background: 'linear-gradient(to right, #10b981, #059669)',
+        },
+      }).showToast();
+
+      // Redirect to tickets list
+      setTimeout(() => {
+        URLHelper.navigate('/tickets');
+      }, 500);
+    });
+  }
+</script>
+{% endblock %}

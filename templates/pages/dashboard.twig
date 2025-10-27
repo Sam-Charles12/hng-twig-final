@@ -1,0 +1,315 @@
+{% extends "base.twig" %}
+
+{% block title %}Dashboard - TicketFlow{% endblock %}
+
+{% block styles %}{% endblock %}
+
+{% block content %}
+<div class="min-h-[calc(100vh-4rem)] bg-gray-50 py-8">
+  <div class="mx-auto w-full max-w-[1440px] px-4">
+    <!-- Header -->
+    <div class="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+      <div>
+        <h1 id="welcomeTitle" class="mb-2 text-3xl font-bold">Welcome back! 👋</h1>
+        <p class="text-gray-600">Here's what's happening with your tickets today.</p>
+      </div>
+      <button id="logoutBtn" class="flex items-center gap-2 rounded-lg bg-red-600 text-white px-4 py-2 hover:bg-red-700 font-medium">
+        <i data-lucide="log-out" class="h-4 w-4"></i>
+        <span>Log out</span>
+      </button>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <!-- Total Tickets -->
+      <div class="rounded-2xl shadow-lg bg-white p-6">
+        <div class="flex flex-row items-center justify-between pb-2 mb-2">
+          <h3 class="text-sm font-semibold text-gray-700">Total Tickets</h3>
+          <i data-lucide="ticket" class="h-4 w-4 text-gray-500"></i>
+        </div>
+        <div class="text-2xl font-bold" id="totalTickets">0</div>
+        <p class="text-xs text-gray-500 mt-1">All time</p>
+      </div>
+
+      <!-- Open Tickets -->
+      <div class="rounded-2xl shadow-lg bg-white p-6">
+        <div class="flex flex-row items-center justify-between pb-2 mb-2">
+          <h3 class="text-sm font-semibold text-gray-700">Open Tickets</h3>
+          <i data-lucide="alert-circle" class="h-4 w-4 text-blue-500"></i>
+        </div>
+        <div class="text-2xl font-bold" id="openTickets">0</div>
+        <p class="text-xs text-gray-500 mt-1">Awaiting assignment</p>
+      </div>
+
+      <!-- In Progress -->
+      <div class="rounded-2xl shadow-lg bg-white p-6">
+        <div class="flex flex-row items-center justify-between pb-2 mb-2">
+          <h3 class="text-sm font-semibold text-gray-700">In Progress</h3>
+          <i data-lucide="clock" class="h-4 w-4 text-yellow-500"></i>
+        </div>
+        <div class="text-2xl font-bold" id="inProgressTickets">0</div>
+        <p class="text-xs text-gray-500 mt-1">Being worked on</p>
+      </div>
+
+      <!-- Closed Tickets -->
+      <div class="rounded-2xl shadow-lg bg-white p-6">
+        <div class="flex flex-row items-center justify-between pb-2 mb-2">
+          <h3 class="text-sm font-semibold text-gray-700">Closed</h3>
+          <i data-lucide="check-circle-2" class="h-4 w-4 text-green-500"></i>
+        </div>
+        <div class="text-2xl font-bold" id="closedTickets">0</div>
+        <p class="text-xs text-gray-500 mt-1">Completed items</p>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid gap-6 lg:grid-cols-3">
+      <!-- Recent Tickets -->
+      <div class="rounded-2xl shadow-lg bg-white lg:col-span-2">
+        <div class="p-6 border-b border-gray-200 flex flex-row items-center justify-between">
+          <h2 class="text-lg font-semibold">Recent Tickets</h2>
+          <button id="viewAllBtn" class="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium">
+            <span>View All</span>
+            <i data-lucide="arrow-right" class="h-4 w-4"></i>
+          </button>
+        </div>
+        <div class="p-6">
+          <div id="recentTicketsContainer" class="space-y-4">
+            <!-- Tickets will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-6">
+        <!-- Quick Actions -->
+        <div class="rounded-2xl shadow-lg bg-white p-6">
+          <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
+          <div class="space-y-2">
+            <button id="createTicketBtn" class="w-full flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium justify-start">
+              <i data-lucide="ticket" class="h-4 w-4"></i>
+              <span>Create New Ticket</span>
+            </button>
+            <button id="viewTicketsBtn" class="w-full flex items-center gap-2 bg-white border-2 border-blue-600 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 font-medium justify-start">
+              <i data-lucide="trending-up" class="h-4 w-4"></i>
+              <span>View All Tickets</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Critical Alert -->
+        <div id="criticalAlert" class="hidden rounded-2xl shadow-lg bg-red-50 border-2 border-red-200 p-6">
+          <h3 class="text-lg font-semibold text-red-700 mb-3 flex items-center gap-2">
+            <i data-lucide="alert-circle" class="h-5 w-5"></i>
+            <span>Critical Alert</span>
+          </h3>
+          <p id="criticalAlertText" class="text-sm text-red-700 mb-4"></p>
+          <button id="viewCriticalBtn" class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 font-medium">
+            View Critical Tickets
+          </button>
+        </div>
+
+        <!-- Ticket Overview -->
+        <div class="rounded-2xl shadow-lg bg-white p-6">
+          <h3 class="text-lg font-semibold mb-4">Ticket Overview</h3>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-600">Open</span>
+              <span id="overviewOpen" class="text-blue-600 font-semibold">0</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-600">In Progress</span>
+              <span id="overviewInProgress" class="text-yellow-600 font-semibold">0</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-600">Closed</span>
+              <span id="overviewClosed" class="text-green-600 font-semibold">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ base_path }}/public/js/tickets.js"></script>
+<script>
+  // Protected route - redirect if not authenticated
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!Auth.isAuthenticated()) {
+      window.location.href = URLHelper.url('/auth/login');
+      return;
+    }
+
+    // Initialize TicketManager
+    TicketManager.init();
+
+    const user = Auth.getUser();
+    document.getElementById('welcomeTitle').textContent = `Welcome back, ${user.name}! 👋`;
+
+    loadDashboardData();
+    setupEventListeners();
+  });
+
+  function loadDashboardData() {
+    const tickets = TicketManager.getAllTickets();
+
+    // Calculate stats
+    const stats = {
+      total: tickets.length,
+      open: tickets.filter(t => t.status === 'open').length,
+      inProgress: tickets.filter(t => t.status === 'in_progress').length,
+      closed: tickets.filter(t => t.status === 'closed').length,
+      critical: tickets.filter(t => t.priority === 'critical').length
+    };
+
+    console.log('Stats:', stats);
+    document.getElementById('totalTickets').textContent = stats.total;
+    document.getElementById('openTickets').textContent = stats.open;
+    document.getElementById('inProgressTickets').textContent = stats.inProgress;
+    document.getElementById('closedTickets').textContent = stats.closed;
+
+    // Update ticket overview
+    document.getElementById('overviewOpen').textContent = stats.open;
+    document.getElementById('overviewInProgress').textContent = stats.inProgress;
+    document.getElementById('overviewClosed').textContent = stats.closed;
+
+    // Show/hide critical alert
+    const criticalAlert = document.getElementById('criticalAlert');
+    if (stats.critical > 0) {
+      criticalAlert.classList.remove('hidden');
+      const text = `You have ${stats.critical} critical ${stats.critical === 1 ? 'ticket' : 'tickets'} that ${stats.critical === 1 ? 'requires' : 'require'} immediate attention.`;
+      document.getElementById('criticalAlertText').textContent = text;
+    } else {
+      criticalAlert.classList.add('hidden');
+    }
+
+    // Load recent tickets (first 5)
+    const recentTickets = tickets.slice(0, 5);
+    renderRecentTickets(recentTickets);
+
+    // Reinitialize Lucide icons
+    lucide.createIcons();
+  }
+
+  function renderRecentTickets(tickets) {
+    const container = document.getElementById('recentTicketsContainer');
+    
+    if (tickets.length === 0) {
+      container.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-12 text-center">
+          <i data-lucide="ticket" class="mb-4 h-12 w-12 text-gray-300"></i>
+          <h3 class="mb-2 font-semibold text-gray-800">No tickets yet</h3>
+          <p class="mb-4 text-gray-600">Create your first ticket to get started</p>
+          <button id="createFirstTicketBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium">
+            Create Ticket
+          </button>
+        </div>
+      `;
+      
+      document.getElementById('createFirstTicketBtn').addEventListener('click', () => {
+        URLHelper.navigate('/ticket-form');
+      });
+      
+      lucide.createIcons();
+      return;
+    }
+
+    const STATUS_LABELS = {
+      'open': 'Open',
+      'in_progress': 'In Progress',
+      'closed': 'Closed'
+    };
+
+    const getStatusColor = (status) => {
+      switch (status) {
+        case 'open': return 'bg-green-100 text-green-700';
+        case 'in_progress': return 'bg-amber-100 text-amber-700';
+        case 'closed': return 'bg-gray-100 text-gray-700';
+        default: return 'bg-gray-100 text-gray-700';
+      }
+    };
+
+    const getPriorityColor = (priority) => {
+      switch (priority) {
+        case 'critical': return 'bg-red-100 text-red-700';
+        case 'high': return 'bg-orange-100 text-orange-700';
+        case 'medium': return 'bg-yellow-100 text-yellow-700';
+        case 'low': return 'bg-green-100 text-green-700';
+        default: return 'bg-gray-100 text-gray-700';
+      }
+    };
+
+    container.innerHTML = tickets.map(ticket => `
+      <div class="flex items-start justify-between gap-4 rounded-lg border p-4 transition-colors hover:bg-gray-50 cursor-pointer" data-ticket-id="${ticket.id}">
+        <div class="flex-1 space-y-2">
+          <div class="flex items-center gap-2">
+            <h4 class="line-clamp-1 font-semibold text-gray-800">${ticket.title}</h4>
+          </div>
+          <p class="line-clamp-2 text-sm text-gray-600">${ticket.description}</p>
+          <div class="flex items-center gap-2">
+            <span class="inline-block px-2 py-1 rounded text-xs font-semibold ${getStatusColor(ticket.status)}">${STATUS_LABELS[ticket.status]}</span>
+            <span class="inline-block px-2 py-1 rounded text-xs font-semibold ${getPriorityColor(ticket.priority)}">${ticket.priority}</span>
+          </div>
+        </div>
+        <div class="text-right text-sm text-gray-500 flex-shrink-0">
+          <p>${new Date(ticket.createdAt).toLocaleDateString()}</p>
+          <p class="text-xs">${ticket.assignee}</p>
+        </div>
+      </div>
+    `).join('');
+
+    // Attach click handlers to recent tickets
+    document.querySelectorAll('[data-ticket-id]').forEach(el => {
+      el.addEventListener('click', () => {
+        const ticketId = el.getAttribute('data-ticket-id');
+        URLHelper.navigate('/ticket-detail?id=' + ticketId);
+      });
+    });
+
+    lucide.createIcons();
+  }
+
+  function setupEventListeners() {
+    // Logout button
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      Auth.logout();
+      Toastify({
+        text: 'Logged out successfully',
+        duration: 2000,
+        gravity: 'top',
+        position: 'right',
+        style: {
+          background: 'linear-gradient(to right, #10b981, #059669)',
+        },
+      }).showToast();
+      
+      setTimeout(() => {
+        URLHelper.navigate('/');
+      }, 500);
+    });
+
+    // Create ticket button
+    document.getElementById('createTicketBtn').addEventListener('click', () => {
+      URLHelper.navigate('/ticket-form');
+    });
+
+    // View all tickets button
+    document.getElementById('viewTicketsBtn').addEventListener('click', () => {
+      URLHelper.navigate('/tickets');
+    });
+
+    // View all button in Recent Tickets header
+    document.getElementById('viewAllBtn').addEventListener('click', () => {
+      URLHelper.navigate('/tickets');
+    });
+
+    // View critical tickets button
+    document.getElementById('viewCriticalBtn').addEventListener('click', () => {
+      URLHelper.navigate('/tickets');
+    });
+  }
+</script>
+{% endblock %}

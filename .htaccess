@@ -1,0 +1,18 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Get the base directory dynamically
+    RewriteBase /hng-twig/
+    
+    # Skip rewrite for existing files and directories
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # Route everything to index.php
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+# If mod_rewrite is not available, show an error
+<IfModule !mod_rewrite.c>
+    ErrorDocument 404 /hng-twig/index.php
+</IfModule>

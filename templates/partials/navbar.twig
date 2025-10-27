@@ -1,0 +1,234 @@
+<header class="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur">
+  <div class="mx-auto flex h-16 w-full max-w-[1440px] items-center justify-between px-4">
+    <!-- Left side: Logo and Navigation -->
+    <div class="flex items-center gap-6">
+      <!-- Logo -->
+      <button id="logoBtn" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
+          <i data-lucide="ticket" class="h-5 w-5 text-white"></i>
+        </div>
+        <span class="text-xl font-semibold text-gray-800">TicketFlow</span>
+      </button>
+
+      <!-- Navigation (visible when authenticated, hidden on mobile) -->
+      <nav id="navLinks" class="hidden md:flex items-center gap-1">
+        <button class="navLink sm:flex items-center hidden gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors font-medium text-gray-700" data-page="dashboard">
+          <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
+          <span>Dashboard</span>
+        </button>
+        <button class="navLink hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors font-medium text-gray-700" data-page="tickets">
+          <i data-lucide="ticket" class="h-4 w-4"></i>
+          <span>Tickets</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Right side: Actions and User Menu -->
+    <div class="flex items-center gap-3">
+      <!-- Authenticated User Section -->
+      <div id="authSection" style="display: none;" class="flex items-center gap-3">
+        <!-- New Ticket Button -->
+        <button id="newTicketBtn" class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium">
+          <i data-lucide="plus" class="h-4 w-4"></i>
+          <span class="hidden sm:inline">New Ticket</span>
+        </button>
+
+        <!-- User Dropdown Menu -->
+        <div class="relative">
+          <button id="userMenuBtn" class="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors font-semibold">
+            <span id="userInitials">U</span>
+          </button>
+
+          <!-- Dropdown Content (hidden by default) -->
+          <div id="userDropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+            <div class="p-4 border-b border-gray-200">
+              <p id="userName" class="font-semibold text-gray-800"></p>
+              <p id="userEmail" class="text-xs text-gray-500"></p>
+            </div>
+            <button id="logoutDropdownBtn" class="w-full flex items-center gap-2 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors text-left">
+              <i data-lucide="log-out" class="h-4 w-4"></i>
+              <span>Log out</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unauthenticated User Section -->
+      <div id="unauthSection" class="flex items-center gap-2">
+        <button id="loginBtn" class="text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-100 font-medium transition-colors">
+          Log in
+        </button>
+        <button id="signupBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium transition-colors">
+          Sign up
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  // Initialize navbar with better timing
+  function initializeNavbar() {
+    // Give Auth time to initialize (it happens in DOMContentLoaded)
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      // DOM is ready, give Auth a moment to initialize
+      setTimeout(() => {
+        console.log('Auth module:', Auth);
+        console.log('Is authenticated:', Auth ? Auth.isAuthenticated() : 'Auth not loaded');
+        updateNavbar();
+        attachNavbarEventListeners();
+      }, 50);
+    } else {
+      // Wait for DOM to be ready
+      document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+          console.log('Auth module:', Auth);
+          console.log('Is authenticated:', Auth ? Auth.isAuthenticated() : 'Auth not loaded');
+          updateNavbar();
+          attachNavbarEventListeners();
+        }, 50);
+      });
+    }
+  }
+
+  // Start initialization immediately
+  initializeNavbar();
+
+  function updateNavbar() {
+    try {
+      const isAuthenticated = Auth.isAuthenticated();
+      const authSection = document.getElementById('authSection');
+      const unauthSection = document.getElementById('unauthSection');
+      const navLinks = document.getElementById('navLinks');
+
+      console.log('=== Navbar Update ===');
+      console.log('isAuthenticated:', isAuthenticated);
+      console.log('authSection:', authSection);
+      console.log('unauthSection:', unauthSection);
+
+      if (isAuthenticated) {
+        console.log('Showing authenticated UI');
+        authSection.style.display = 'flex';
+        unauthSection.style.display = 'none';
+        // Don't override navLinks display - let Tailwind's hidden md:flex handle it
+        navLinks.classList.remove('hidden');
+
+        // Set user info
+        const user = Auth.getUser();
+        console.log('Current user:', user);
+        if (user) {
+          const initials = (user.name || 'U').substring(0, 2).toUpperCase();
+          document.getElementById('userInitials').textContent = initials;
+          document.getElementById('userName').textContent = user.name || 'User';
+          document.getElementById('userEmail').textContent = user.email || '';
+        }
+      } else {
+        console.log('Showing unauthenticated UI');
+        authSection.style.display = 'none';
+        unauthSection.style.display = 'flex';
+        navLinks.classList.add('hidden');
+      }
+
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    } catch (error) {
+      console.error('Error updating navbar:', error);
+    }
+  }
+
+  function attachNavbarEventListeners() {
+    try {
+      // Logo button
+      const logoBtn = document.getElementById('logoBtn');
+      if (logoBtn) {
+        logoBtn.addEventListener('click', () => {
+          if (Auth.isAuthenticated()) {
+            URLHelper.navigate('/dashboard');
+          } else {
+            URLHelper.navigate('/');
+          }
+        });
+      }
+
+      // Navigation links
+      document.querySelectorAll('.navLink').forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const page = link.getAttribute('data-page');
+          URLHelper.navigate('/' + page);
+        });
+      });
+
+      // New Ticket button
+      const newTicketBtn = document.getElementById('newTicketBtn');
+      if (newTicketBtn) {
+        newTicketBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          URLHelper.navigate('/ticket-form');
+        });
+      }
+
+      // User menu toggle
+      const userMenuBtn = document.getElementById('userMenuBtn');
+      const userDropdown = document.getElementById('userDropdown');
+      
+      if (userMenuBtn && userDropdown) {
+        userMenuBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          userDropdown.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+          if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+            userDropdown.classList.add('hidden');
+          }
+        });
+      }
+
+      // Logout button (in dropdown)
+      const logoutDropdownBtn = document.getElementById('logoutDropdownBtn');
+      if (logoutDropdownBtn) {
+        logoutDropdownBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          Auth.logout();
+          Toastify({
+            text: 'Logged out successfully',
+            duration: 2000,
+            gravity: 'top',
+            position: 'right',
+            style: {
+              background: 'linear-gradient(to right, #10b981, #059669)',
+            },
+          }).showToast();
+          
+          setTimeout(() => {
+            URLHelper.navigate('/');
+          }, 500);
+        });
+      }
+
+      // Login button
+      const loginBtn = document.getElementById('loginBtn');
+      if (loginBtn) {
+        loginBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          URLHelper.navigate('/auth/login');
+        });
+      }
+
+      // Sign up button
+      const signupBtn = document.getElementById('signupBtn');
+      if (signupBtn) {
+        signupBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          URLHelper.navigate('/auth/register');
+        });
+      }
+    } catch (error) {
+      console.error('Error attaching event listeners:', error);
+    }
+  }
+</script>

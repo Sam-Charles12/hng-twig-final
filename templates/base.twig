@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TicketFlow{% endblock %}</title>
+    
+    {# Tailwind CSS CDN #}
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    
+    {# Toastify CSS CDN #}
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
+    {# Custom CSS #}
+    {# <link rel="stylesheet" href="{{ base_path }}/public/index.css"> #}
+    
+    {# Custom styles block #}
+    {% block styles %}{% endblock %}
+</head>
+<body class="min-h-screen bg-white">
+    {# Navbar #}
+    {% include 'partials/navbar.twig' %}
+    
+    {# Main content block #}
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    {# Footer #}
+    {% include 'partials/footer.twig' %}
+    
+    {# Lucide Icons CDN #}
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+    
+    {# Toastify JS CDN #}
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    
+    {# URL Helper - Must load before other scripts #}
+    <script src="{{ base_path }}/public/js/url-helper.js"></script>
+    
+    {# Authentication Module #}
+    <script src="{{ base_path }}/public/js/auth.js"></script>
+    
+    {# Custom scripts block #}
+    {% block scripts %}{% endblock %}
+</body>
+</html>
